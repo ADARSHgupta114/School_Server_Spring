@@ -11,4 +11,5 @@ public interface studentService {
     void saveStudents(Student student);
     Optional<Student> findById(long id);
     void deleteStudent(long id);
+    studentDTO updateStudentService(long id, studentDTO dto);
 }

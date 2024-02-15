@@ -7,26 +7,29 @@ import com.school_server.payload.studentDTO;
 import com.school_server.repository.studentRepository;
 import com.school_server.services.studentService;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/students")
 public class studentController {
    private studentService studentservice;
 
-
     public studentController(studentService studentservice) {
         this.studentservice = studentservice;
     }
     //http://localhost:8080/api/students/save-student
+
     @PostMapping("/save-student")
     public ResponseEntity<?> saveStudent(@Valid @RequestBody Student student, BindingResult result){
         if(result.hasErrors())
@@ -35,6 +38,7 @@ public class studentController {
         return new ResponseEntity<>(student,HttpStatus.CREATED);
     }
     //http://localhost:8080/api/students/
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Student> getAstudentById(@PathVariable long id){
         Optional<Student> findById = studentservice.findById(id);
@@ -66,19 +70,10 @@ public class studentController {
         }
         return new ResponseEntity<>("Record Deleted Successfully",HttpStatus.OK);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-student/{id}")
-    public void updateStudentById(@PathVariable long id,@RequestBody studentDTO dto){
-        Student student = studentservice.findById(id).get();
-        student.setName(dto.getName());
-        student.setFather(dto.getFather());
-        student.setMother(dto.getMother());
-        student.setDOB(dto.getDOB());
-        student.setMobile(dto.getMobile());
-        student.setGender(dto.getGender());
-        student.setEmail(dto.getEmail());
-        student.setStandard(dto.getStandard());
-        student.setDOA(dto.getDOA());
-        student.setAddress(dto.getAddress());
-        studentservice.saveStudents(student);
+    public ResponseEntity<studentDTO> updateStudentById(@PathVariable long id,@RequestBody studentDTO dto){
+        studentDTO UpdatedDTO = studentservice.updateStudentService(id,dto);
+        return new ResponseEntity<>(UpdatedDTO,HttpStatus.OK);
     }
 }
