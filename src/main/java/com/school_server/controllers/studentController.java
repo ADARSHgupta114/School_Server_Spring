@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/students")
+@EnableWebSecurity
 public class studentController {
    private studentService studentservice;
 
@@ -29,7 +31,7 @@ public class studentController {
         this.studentservice = studentservice;
     }
     //http://localhost:8080/api/students/save-student
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save-student")
     public ResponseEntity<?> saveStudent(@Valid @RequestBody Student student, BindingResult result){
         if(result.hasErrors())
@@ -38,7 +40,6 @@ public class studentController {
         return new ResponseEntity<>(student,HttpStatus.CREATED);
     }
     //http://localhost:8080/api/students/
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Student> getAstudentById(@PathVariable long id){
         Optional<Student> findById = studentservice.findById(id);
@@ -60,6 +61,7 @@ public class studentController {
         return  new ResponseEntity<>(studentdto,HttpStatus.OK);
     }
     //http://localhost:8080/api/students/delete-student/
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete-student/{id}")
     public ResponseEntity<?> deleteStudentbyId(@PathVariable long id){
         Optional<Student> findById = studentservice.findById(id);
